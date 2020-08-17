@@ -10,6 +10,8 @@ const G  = 9.81;  // gravitational constant in m/s^2
 // Visualisation parameters
 const DIMX  = 800;  // canvas width
 const DIMY  = 600;  // canvas height
+const HALFX = DIMX * 0.5;
+const HALFY = DIMY * 0.5;
 const SCALE = 100;  // pixels per metre
 const CARTW =  60;  // cart width in pixels
 const CARTH =  20;  // cart Height in pixels
@@ -22,6 +24,7 @@ let theta = 0.1;  // pendulum angle (0 = straight up, anti-clockwise = positive)
 let omega = 0;  // pendulum angular velocity
 
 // Convenience / derivative values
+const HALFPI = Math.PI * 0.5;
 const WHEELB = (CARTW - CARTH) * 0.5;
 const WHEELR = CARTH * 0.5;
 const A = pm / (pm + cm);
@@ -30,6 +33,7 @@ const C = A * L;
 const D = A / pm;
 const E = G / L;
 const F = D / L;
+const LP = L * SCALE;
 
 function setup() {
 	createCanvas(DIMX, DIMY);
@@ -42,10 +46,11 @@ function setup() {
 
 function draw() {
 	// Define grid
-	translate(DIMX * 0.5, DIMY * 0.5);  // origin at the centre
+	translate(HALFX, HALFY);  // origin at the centre
 	scale(1, -1);   // positive y goes up, keep pixel scaling
 	background(0);  // black background
-	
+	line(-HALFX, -CARTH, HALFX, -CARTH);  // ground
+
 	// Draw cart
 	push();
 	translate(cartx * SCALE, 0);
@@ -55,11 +60,13 @@ function draw() {
 	pop();
 
 	// Draw pendulum
-	const px = cos(theta + PI * 0.5) * L * SCALE;
-	const py = sin(theta + PI * 0.5) * L * SCALE;
+	const rot = theta + HALFPI;
+	const px = cos(rot) * LP;
+	const py = sin(rot) * LP;
 	line(cartx * SCALE, 0, px, py);
 	circle(px, py, PENDR);
 
+	// PDE
 	const cost = cos(theta);
 	const sint = sin(theta);
 	const U = 0;
@@ -68,6 +75,7 @@ function draw() {
 	const carta = (B * sint * cost - L * W2 + D * U) / det;
 	const penda = (E * sint - W2 * cost + F * U * cost) / det;
 
+	// Euler
 	cartv += carta * DT;
 	cartx += cartv * DT;
 	omega += penda * DT;
