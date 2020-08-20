@@ -15,11 +15,31 @@
 			a:hover { text-decoration: underline; }
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
-		<script src="particle.js"></script>
-		<script src="cart.js"></script>
-		<script src="pendulum.js"></script>
 		<script src="sketch.js"></script>
 		<title>PID controlled cart with an inverted pendulum</title>
 	</head>
-	<body></body>
+	<body>
+		<table border="0" cellspacing="0" cellpadding="10">
+			<tr>
+				<td>&theta;<sub>0</sub></td>
+				<td id="cntTheta"></td>
+				<td id="valTheta"></td>
+			</tr>
+			<tr>
+				<td>K<sub>p</sub></td>
+				<td id="cntProp"></td>
+				<td id="valProp"></td>
+			</tr>
+			<tr>
+				<td>K<sub>i</sub></td>
+				<td id="cntInt"></td>
+				<td id="valInt"></td>
+			</tr>
+			<tr>
+				<td>K<sub>d</sub></td>
+				<td id="cntDif"></td>
+				<td id="valDif"></td>
+			</tr>
+		</table>
+	</body>
 </html>
