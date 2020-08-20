@@ -13,32 +13,72 @@
 			canvas { display: block; }
 			a { text-decoration: none; }
 			a:hover { text-decoration: underline; }
+			table, tr, th, td {border: 0; margin: 0; padding: 0; }
+			th, td { padding: 2px 10px; text-align: right; }
+			.tal { text-align: left; }
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
 		<script src="sketch.js"></script>
 		<title>PID controlled cart with an inverted pendulum</title>
 	</head>
 	<body>
-		<table border="0" cellspacing="0" cellpadding="10">
+		<table cellspacing="0">
+			<tr>
+				<td></td>
+				<th>Min</th>
+				<th>Cur</th>
+				<th>Max</th>
+			</tr>
+			<tr>
+				<th>Position (cm)</th>
+				<td id="minx">0</td>
+				<td id="curx">0</td>
+				<td id="maxx">0</td>
+			</tr>
+			<tr>
+				<th>Force (N)</th>
+				<td id="minU">0</td>
+				<td id="curU">0</td>
+				<td id="maxU">0</td>
+			</tr>
+		</table>
+		<div id="sketch"></div>
+		<table cellspacing="0">
 			<tr>
 				<td>&theta;<sub>0</sub></td>
 				<td id="cntTheta"></td>
 				<td id="valTheta"></td>
+				<td class="tal">&deg;</td>
 			</tr>
 			<tr>
 				<td>K<sub>p</sub></td>
 				<td id="cntProp"></td>
 				<td id="valProp"></td>
+				<td class="tal"></td>
 			</tr>
 			<tr>
 				<td>K<sub>i</sub></td>
 				<td id="cntInt"></td>
 				<td id="valInt"></td>
+				<td class="tal"></td>
 			</tr>
 			<tr>
 				<td>K<sub>d</sub></td>
 				<td id="cntDif"></td>
 				<td id="valDif"></td>
+				<td class="tal"></td>
+			</tr>
+			<tr>
+				<td>m<sub>cart</sub></td>
+				<td id="cntMc"></td>
+				<td id="valMc"></td>
+				<td class="tal">kg</td>
+			</tr>
+			<tr>
+				<td>m<sub>pend</sub></td>
+				<td id="cntMp"></td>
+				<td id="valMp"></td>
+				<td class="tal">kg</td>
 			</tr>
 		</table>
 	</body>
