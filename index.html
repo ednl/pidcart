@@ -25,21 +25,31 @@
 		<table cellspacing="0">
 			<tr>
 				<td></td>
-				<th>Min</th>
-				<th>Cur</th>
-				<th>Max</th>
+				<td>Min</td>
+				<td>Cur</td>
+				<td>Max</td>
+				<td></td>
 			</tr>
 			<tr>
-				<th>Position (cm)</th>
-				<td id="minx">0</td>
-				<td id="curx">0</td>
-				<td id="maxx">0</td>
+				<td>Angle</td>
+				<td id="minth"></td>
+				<td id="curth"></td>
+				<td id="maxth"></td>
+				<td class="tal">&deg;</td>
 			</tr>
 			<tr>
-				<th>Force (N)</th>
-				<td id="minU">0</td>
-				<td id="curU">0</td>
-				<td id="maxU">0</td>
+				<td>Position</td>
+				<td id="minx"></td>
+				<td id="curx"></td>
+				<td id="maxx"></td>
+				<td class="tal">cm</td>
+			</tr>
+			<tr>
+				<td>Force</td>
+				<td id="minU"></td>
+				<td id="curU"></td>
+				<td id="maxU"></td>
+				<td class="tal">N</td>
 			</tr>
 		</table>
 		<div id="sketch"></div>
@@ -67,6 +77,12 @@
 				<td id="cntDif"></td>
 				<td id="valDif"></td>
 				<td class="tal"></td>
+			</tr>
+			<tr>
+				<td>L</td>
+				<td id="cntLen"></td>
+				<td id="valLen"></td>
+				<td class="tal">cm</td>
 			</tr>
 			<tr>
 				<td>m<sub>cart</sub></td>

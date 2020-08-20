@@ -1,7 +1,7 @@
 // Physical parameters
 let   Mc  = 2;        // cart mass [kg]
 let   Mp  = 1;        // pendulum mass [kg]
-const L   = 1;        // pendulum length [m]
+let   L   = 1;        // pendulum length [m]
 const G   = 9.81;     // gravitational constant [m/s^2]
 const CRR = 0.001;    // coefficient of rolling resistance
 const CD  = 1;        // aerodynamic drag coefficient
@@ -32,8 +32,10 @@ let CARTW = CARTH * 3;  // cart width in pixels
 let PENDR = Math.pow(Mp / 1000, 1 / 3) * SCALE;  // pendulum radius in pixels
 
 // Visualisation variables
-let minx = 0;
-let maxx = 0;
+let minth = theta * 180 / Math.PI;
+let maxth = minth;
+let minx = cartx;
+let maxx = minx;
 let minU = 0;
 let maxU = 0;
 
@@ -46,8 +48,8 @@ let   C1 = Mp / (Mp + Mc);
 let   C2 = C1 * G;
 let   C3 = C1 / Mp;
 let   C4 = C3 / L;
-const C5 = G / L;
-const LP = L * SCALE;
+let   C5 = G / L;
+let   LP = L * SCALE;
 
 // Controller variables
 let U = 0;           // external control force on cart in î direction
@@ -58,20 +60,33 @@ let err_dif = 0;     // change in error
 let isDown = false;  // is the pendulum in the bootom half?
 
 // Interface variables
-let slideTheta, slideProp, slideInt, slideDif, slideMc, slideMp;
+let slideTheta, slideProp, slideInt, slideDif, slideLen, slideMc, slideMp;
 
 function showVal() {
+	document.getElementById("minth").innerHTML = minth;
+	document.getElementById("maxth").innerHTML = maxth;
+	document.getElementById("minx").innerHTML = minx;
+	document.getElementById("maxx").innerHTML = maxx;
+	document.getElementById("minU").innerHTML = minU;
+	document.getElementById("maxU").innerHTML = maxU;
 	document.getElementById("valTheta").innerHTML = round(theta * 18000 / PI) / 100;
 	document.getElementById("valProp").innerHTML = round(slideProp.value() * 100) / 100;
 	document.getElementById("valInt").innerHTML = round(slideInt.value() * 100) / 100;
 	document.getElementById("valDif").innerHTML = round(slideDif.value() * 100) / 100;
+	document.getElementById("valLen").innerHTML = round(slideLen.value() * 100) / 100;
 	document.getElementById("valMc").innerHTML = round(slideMc.value() * 100) / 100;
 	document.getElementById("valMp").innerHTML = round(slideMp.value() * 100) / 100;
 }
 
 function reset() {
+	theta = HALF_PI - (slideTheta.value() * PI / 180);
+	Kp = slideProp.value();
+	Ki = slideInt.value() * DT;
+	Kd = slideDif.value() / DT;
+	L = slideLen.value() / 100;
 	Mc = slideMc.value();
 	Mp = slideMp.value();
+
 	CARTH = Math.pow(Mc / 1000, 1 / 3) * SCALE;  // cart height in pixels
 	CARTW = CARTH * 3;  // cart width in pixels
 	PENDR = Math.pow(Mp / 1000, 1 / 3) * SCALE;  // pendulum radius in pixels
@@ -81,23 +96,40 @@ function reset() {
 	C2 = C1 * G;
 	C3 = C1 / Mp;
 	C4 = C3 / L;
+	C5 = G / L;
+	LP = L * SCALE;
 
 	cartv = 0;
 	cartx = 0;
 	omega = 0;
-	theta = HALF_PI - (slideTheta.value() * PI / 180);
-	Kp = slideProp.value();
-	Ki = slideInt.value() * DT;
-	Kd = slideDif.value() / DT;
-
-	minx = 0;
-	maxx = 0;
+	minth = round(theta * 180 / PI);
+	maxth = minth;
+	minx = round(cartx * 100);
+	maxx = minx;
 	minU = 0;
 	maxU = 0;
 	err_prv = 0;
 	err_sum = 0;
 	isDown = false;
 	showVal();
+}
+
+function btnZeroPID() {
+	slideProp.value(0);
+	slideInt.value(0);
+	slideDif.value(0);
+	reset();
+}
+
+function btnResetAll() {
+	slideTheta.value(90 - 10);
+	slideProp.value(200);
+	slideInt.value(10);
+	slideDif.value(5);
+	slideLen.value(100);
+	slideMc.value(2);
+	slideMp.value(1);
+	reset();
 }
 
 function setup() {
@@ -114,6 +146,7 @@ function setup() {
 	slideProp = createSlider(0, 2000, Kp, 2);
 	slideInt = createSlider(0, 1000, Ki / DT, 1);
 	slideDif = createSlider(0, 1000, Kd * DT, 1);
+	slideLen = createSlider(1, 200, L * 100, 1);
 	slideMc = createSlider(0.01, 10, Mc, 0.01);
 	slideMp = createSlider(0.01, 10, Mp, 0.01);
 
@@ -121,6 +154,7 @@ function setup() {
 	slideProp.parent('cntProp');
 	slideInt.parent('cntInt');
 	slideDif.parent('cntDif');
+	slideLen.parent('cntLen');
 	slideMc.parent('cntMc');
 	slideMp.parent('cntMp');
 
@@ -128,6 +162,7 @@ function setup() {
 	slideProp.style('width', '1001px');
 	slideInt.style('width', '1001px');
 	slideDif.style('width', '1001px');
+	slideLen.style('width', '1001px');
 	slideMc.style('width', '1001px');
 	slideMp.style('width', '1001px');
 
@@ -135,10 +170,17 @@ function setup() {
 	slideProp.changed(reset);
 	slideInt.changed(reset);
 	slideDif.changed(reset);
+	slideLen.changed(reset);
 	slideMc.changed(reset);
 	slideMp.changed(reset);
 
 	showVal();
+
+	const btn1 = createButton('Zero PID');
+	btn1.mousePressed(btnZeroPID);
+
+	const btn2 = createButton('Reset All');
+	btn2.mousePressed(btnResetAll);
 }
 
 function draw() {
@@ -158,6 +200,9 @@ function draw() {
 			U = Kp * err_cur + Ki * err_sum + Kd * err_dif;
 			// if ((theta < 0 && omega < 0 && cartx < 0) || (theta > 0 && omega > 0 && cartx > 0)) {
 			// 	U -= 0.01 * cartx;
+			// }
+			// if (Math.abs(U) < 0.001) {
+			// 	U = 0;
 			// }
 		} else {
 			isDown = true;
@@ -187,10 +232,20 @@ function draw() {
 		}
 
 		// Range display
+		const curth = round(theta * 180 / PI);
 		const curx = round(cartx * 100);
 		const curU = round(U);
+		document.getElementById("curth").innerHTML = curth;
 		document.getElementById("curx").innerHTML = curx;
 		document.getElementById("curU").innerHTML = curU;
+		if (curth < minth) {
+			minth = curth;
+			document.getElementById("minth").innerHTML = curth;
+		}
+		if (curth > maxth) {
+			maxth = curth;
+			document.getElementById("maxth").innerHTML = curth;
+		}
 		if (curx < minx) {
 			minx = curx;
 			document.getElementById("minx").innerHTML = curx;
@@ -213,22 +268,28 @@ function draw() {
 	translate(HALFX, HALFY);    // origin at the centre
 	scale(1, -1);               // positive y goes up, keep pixel scaling
 	background(0);              // clear screen
-	line(-HALFX, 0, HALFX, 0);  // ground
-	line(0, -HALFY, 0, HALFY);         // origin marker
+	line(-HALFX, 0, HALFX, 0);  // ground (y = 0)
+	stroke(255, 255, 255, 102);
+	line(0, -HALFY, 0, HALFY);  // line x = 0
 	const pminx = minx * 0.01 * SCALE - CARTW * 0.5;
 	const pmaxx = maxx * 0.01 * SCALE + CARTW * 0.5;
+	stroke(255, 255, 51);
 	line(pminx, WHEELR, pminx, WHEELR + CARTH); // range marker
 	line(pmaxx, WHEELR, pmaxx, WHEELR + CARTH); // range marker
+	stroke(255);
 
 	// Draw cart and pendulum from cart position
 	push();
 	translate(cartx * SCALE, CARTH);  // also compensate for cart height
+	fill(102, 153, 255, 153);
 	rect(0, 0, CARTW, CARTH);
+	fill(102, 153, 255, 153);
 	arc(-WHEELB, -WHEELR, WHEELR, WHEELR, PI, 0);
 	arc( WHEELB, -WHEELR, WHEELR, WHEELR, PI, 0);
 	const px = -sint * LP;  // cos(a+pi/2) = -sin(a)
 	const py =  cost * LP;  // sin(a+pi/2) =  cos(a)
-	line(0, 0, px, py);
+	fill(255, 102, 153, 153);
 	circle(px, py, PENDR);
+	line(0, 0, px, py);
 	pop();
 }
