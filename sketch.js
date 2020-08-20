@@ -274,8 +274,8 @@ function draw() {
 	const pminx = minx * 0.01 * SCALE - CARTW * 0.5;
 	const pmaxx = maxx * 0.01 * SCALE + CARTW * 0.5;
 	stroke(255, 255, 51);
-	line(pminx, WHEELR, pminx, WHEELR + CARTH); // range marker
-	line(pmaxx, WHEELR, pmaxx, WHEELR + CARTH); // range marker
+	line(pminx, 0, pminx, WHEELR + CARTH); // range marker
+	line(pmaxx, 0, pmaxx, WHEELR + CARTH); // range marker
 	stroke(255);
 
 	// Draw cart and pendulum from cart position
